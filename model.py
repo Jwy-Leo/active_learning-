@@ -5,7 +5,8 @@ import torch.nn.functional as F
 def get_net(name):
     if name == 'MNIST':
         #return Net1
-        return LeNet5
+        # return LeNet5
+        return LeNet5_dataparallel
     elif name == 'FashionMNIST':
         return Net1
     elif name == 'SVHN':
@@ -39,6 +40,11 @@ class LeNet5(nn.Module):
         return x, feature
     def get_embedding_dim(self):
         return self.embedding_dim
+class LeNet5_dataparallel(nn.DataParallel):
+    def __init__(self,module=LeNet5(),device_ids=None,output_device=None,dim=0):
+        super(LeNet5_dataparallel,self).__init__(module,device_ids,output_device,dim)
+    def get_embedding_dim(self):
+        return self.module.get_embedding_dim()
 class Net1(nn.Module):
     def __init__(self):
         super(Net1, self).__init__()

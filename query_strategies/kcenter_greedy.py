@@ -3,8 +3,8 @@ from .strategy import Strategy
 from sklearn.neighbors import NearestNeighbors
 import torch
 class KCenterGreedy(Strategy):
-    def __init__(self, X, Y, idxs_lb, net, handler, args):
-        super(KCenterGreedy, self).__init__(X, Y, idxs_lb, net, handler, args)
+    def __init__(self, X, Y, idxs_lb, net, handler, args,X_te,Y_te):
+        super(KCenterGreedy, self).__init__(X, Y, idxs_lb, net, handler, args,X_te,Y_te)
 
     def query(self, n):
         GPU_VERSION = True
@@ -68,7 +68,7 @@ class KCenterGreedy(Strategy):
                                         q_idx = torch.arange(self.n_pool)[lb_index][q_idx_]
                                         lb_index = set(lb_index)-set([int(q_idx)])
                                         lb_index = list(lb_index)
-                                        gather_index = torch.LongTensor(range(q_idx)+range(q_idx+1,mat.size(0)))[:,None].repeat(1,mat.size(1))
+                                        gather_index = torch.LongTensor(list(range(q_idx))+list(range(q_idx+1,mat.size(0),1)))[:,None].repeat(1,mat.size(1))
                                         mat = torch.gather(mat,0,gather_index.cuda())
                                         mat = torch.cat([mat,(torch.FloatTensor(dist_mat[lb_index,int(q_idx)])[:, None]).cuda()],dim=1)
 

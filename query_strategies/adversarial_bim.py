@@ -4,8 +4,8 @@ import torch.nn.functional as F
 from .strategy import Strategy
 
 class AdversarialBIM(Strategy):
-	def __init__(self, X, Y, idxs_lb, net, handler, args, eps=0.05):
-		super(AdversarialBIM, self).__init__(X, Y, idxs_lb, net, handler, args)
+	def __init__(self, X, Y, idxs_lb, net, handler, args,X_te,Y_te, eps=0.05):
+		super(AdversarialBIM, self).__init__(X, Y, idxs_lb, net, handler, args,X_te,Y_te)
 		self.eps = eps
 
 	def cal_dis(self, x):
@@ -31,7 +31,7 @@ class AdversarialBIM(Strategy):
 	def query(self, n):
 		idxs_unlabeled = np.arange(self.n_pool)[~self.idxs_lb]
 
-		self.clf.cpu()
+		#self.clf.cpu()
 		self.clf.eval()
 		dis = np.zeros(idxs_unlabeled.shape)
 
@@ -42,7 +42,7 @@ class AdversarialBIM(Strategy):
 			x, y, idx = data_pool[i]
 			dis[i] = self.cal_dis(x)
 
-		self.clf.cuda()
+		#self.clf.cuda()
 
 		return idxs_unlabeled[dis.argsort()[:n]]
 

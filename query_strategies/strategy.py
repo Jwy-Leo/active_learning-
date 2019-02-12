@@ -10,7 +10,8 @@ class Strategy(object):
         self.Y = Y
         self.idxs_lb = idxs_lb
         # self.net = net
-        self.net = torch.nn.DataParallel(net()).cuda()
+        # self.net = torch.nn.DataParallel(net()).cuda()
+        self.net = net().cuda()
         self.handler = handler
         self.args = args
         self.n_pool = len(Y)
@@ -18,7 +19,7 @@ class Strategy(object):
         self.device = torch.device("cuda" if use_cuda else "cpu")
         # wenyen modify
         self.optimizer = None
-        self.Stop_rule = ES(40)
+        self.Stop_rule = ES(3)
         self.test_data_X = test_X
         self.test_data_Y = test_Y
     def query(self, n):
@@ -49,6 +50,7 @@ class Strategy(object):
         performance = float(result.sum())/float(result.size(0))
         return float(performance)
     def train(self):
+        
         n_epoch = self.args['n_epoch']
         # self.clf = self.net().to(self.device)
         self.clf = self.net

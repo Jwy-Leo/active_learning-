@@ -7,8 +7,8 @@ import torch
 import gurobipy as gurobi
 
 class CoreSet(Strategy):
-    def __init__(self, X, Y, idxs_lb, net, handler, args, tor=1e-4):
-        super(CoreSet, self).__init__(X, Y, idxs_lb, net, handler, args)
+    def __init__(self, X, Y, idxs_lb, net, handler, args,X_te,Y_te, tor=1e-4):
+        super(CoreSet, self).__init__(X, Y, idxs_lb, net, handler, args,X_te,Y_te)
         self.tor = tor
 
     def mip_model(self, representation, labeled_idx, budget, delta, outlier_count, greedy_indices=None):
