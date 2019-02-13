@@ -128,7 +128,7 @@ class CoreSet(Strategy):
                     q_idx = torch.arange(self.n_pool)[lb_index][q_idx_]
                     lb_index = set(lb_index)-set([int(q_idx)])
                     lb_index = list(lb_index)
-                    gather_index = torch.LongTensor(range(q_idx)+range(q_idx+1,mat.size(0)))[:,None].repeat(1,mat.size(1))
+                    gather_index = torch.LongTensor(list(range(q_idx))+list(range(q_idx+1,mat.size(0),1)))[:,None].repeat(1,mat.size(1))
                     mat = torch.gather(mat,0,gather_index.cuda())
                     mat = torch.cat([mat,(torch.FloatTensor(dist_mat[lb_index,int(q_idx)])[:, None]).cuda()],dim=1)
                 opt = float(mat.min(dim=1)[0].max().data)
@@ -149,6 +149,7 @@ class CoreSet(Strategy):
         eps = 0.01
         upper_bound = opt
         lower_bound = opt / 2.0
+        '''
         print("Building MIP Model...")
         model, graph = self.mip_model(representation, labeled_idx, len(labeled_idx) + amount, upper_bound, outlier_count, greedy_indices=new_indices)
         model.Params.SubMIPNodes = submipnodes
@@ -187,37 +188,31 @@ class CoreSet(Strategy):
                 model.optimize()
 
         return np.array(indices)
-
-
-
-		
-        # import pdb;pdb.set_trace()
         '''
-		SEED = 5
 
-		pickle.dump((xx.tolist(), yy.tolist(), dd.tolist(), subset, float(opt), n, self.n_pool), open('mip{}.pkl'.format(SEED), 'wb'), 2)
+        SEED = 5
+        pickle.dump((xx.tolist(), yy.tolist(), dd.tolist(), subset, float(opt), n, self.n_pool), open('mip{}.pkl'.format(SEED), 'wb'), 2)
 
-		import ipdb
-		ipdb.set_trace()
-		# solving MIP
-		# download Gurobi software from http://www.gurobi.com/
-		# sh {GUROBI_HOME}/linux64/bin/gurobi.sh < core_set_sovle_solve.py
+        # import ipdb;ipdb.set_trace()
+        # solving MIP
+        # download Gurobi software from http://www.gurobi.com/
+        # sh {GUROBI_HOME}/linux64/bin/gurobi.sh < core_set_sovle_solve.py
 
-		sols = pickle.load(open('sols{}.pkl'.format(SEED), 'rb'))
+        sols = pickle.load(open('sols{}.pkl'.format(SEED), 'rb'))
 
-		if sols is None:
-			q_idxs = lb_flag
-		else:
-			lb_flag_[sols] = True
-			q_idxs = lb_flag_
-		print('sum q_idxs = {}'.format(q_idxs.sum()))
+        if sols is None:
+            q_idxs = lb_flag
+        else:
+            lb_flag_[sols] = True
+            q_idxs = lb_flag_
+        print('sum q_idxs = {}'.format(q_idxs.sum()))
 		
-		return np.arange(self.n_pool)[(self.idxs_lb ^ q_idxs)]
-		'''
-
-
-
         return np.arange(self.n_pool)[(self.idxs_lb ^ q_idxs)]
+		
+
+
+
+        #return np.arange(self.n_pool)[(self.idxs_lb ^ q_idxs)]
 
 
 

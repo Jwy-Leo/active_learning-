@@ -19,7 +19,7 @@ class Strategy(object):
         self.device = torch.device("cuda" if use_cuda else "cpu")
         # wenyen modify
         self.optimizer = None
-        self.Stop_rule = ES(3)
+        self.Stop_rule = ES(40)
         self.test_data_X = test_X
         self.test_data_Y = test_Y
     def query(self, n):
@@ -66,7 +66,6 @@ class Strategy(object):
                             shuffle=True, **self.args['loader_tr_args'])
         loader_te = DataLoader(self.handler(self.test_data_X,self.test_data_Y,transform=self.args['transform']), \
                                shuffle=False, batch_size=500,num_workers = 4)
-                                
         # for epoch in range(1, n_epoch+1):
         #     self._train(epoch, loader_tr, optimizer)
         self.Stop_rule._New_Update_Round()

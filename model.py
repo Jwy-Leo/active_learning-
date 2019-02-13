@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 def get_net(name):
     if name == 'MNIST':
-        #return Net1
+        # return Net1
         # return LeNet5
         return LeNet5_dataparallel
     elif name == 'FashionMNIST':
@@ -19,7 +19,7 @@ class LeNet5(nn.Module):
         self.embedding_dim = feature_out
         Module_list = []
 
-        Module_list.append(nn.Conv2d(1,6,kernel_size = 5, stride = 1, padding = 2))
+        Module_list.append(nn.Conv2d(3,6,kernel_size = 5, stride = 1, padding = 2))
         Module_list.append(nn.BatchNorm2d(6))
         Module_list.append(nn.ReLU())
         Module_list.append(nn.MaxPool2d(2))

@@ -5,10 +5,9 @@ from model import get_net
 from torchvision import transforms
 import torch
 from query_strategies import RandomSampling, LeastConfidence, MarginSampling, EntropySampling, \
-                                LeastConfidenceDropout, MarginSamplingDropout, EntropySamplingDropout, \
+                                LeastConfidenceDropout, MarginSamplingDropout, EntropySamplingDropout, CoreSet, \
                                 KMeansSampling, KCenterGreedy, BALDDropout, \
                                 AdversarialBIM, AdversarialDeepFool, ActiveLearningByLearning
-#CoreSet,
 from tensorboardX import SummaryWriter
 import argparse
 
@@ -21,9 +20,11 @@ enum_training_strategy=["Random Query", "Shannon Entropy Sampling", "LeastConfid
                        "KCenter Sampling", "CoreSet Sampling", "ALBL Sampling ", "BALDDropout(MC-dropout)", "Shannon Entorpy Sampling with dropout", \
                        "LeastConfidence Sampling with dropout", "Margin Entropy Sampling with dropout", "AdversarialBIM", "Deepfool"]
 
+#, transforms.Normalize((0.1307,), (0.3081,))]),
+#{'n_epoch': 200, 'transform': transforms.Compose([transforms.ToTensor()]),
 # Datasets
 datasets_setting = {'MNIST':
-                {'n_epoch': 200, 'transform': transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]),
+                {'n_epoch': 200, 'transform': transforms.ToTensor(),
                  'loader_tr_args':{'batch_size': 64, 'num_workers': 10},
                  'loader_te_args':{'batch_size': 10000, 'num_workers': 10},
                  'optimizer_args':{'lr': 0.01, 'momentum': 0.5}},
@@ -66,6 +67,8 @@ def arguments():
 
     
     args = parse.parse_args()
+    if args.datasets not in datasets_setting.keys():
+        raise ValueError("The datasets should be:\n"+"".join(["{}\n".format(name) for name in datasets_setting.keys()]))
     print(args)
 
     return args
@@ -108,11 +111,9 @@ def main(args):
         strategy = KMeansSampling(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te)
     elif args.query_mode == 5 :
         strategy = KCenterGreedy(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te)
-        #raise NotImplementedError("gpu memory issue in line 73 of kcenter file")
     elif args.query_mode == 6 :
-        # strategy = CoreSet(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te)
-        raise NotImplementedError("Yet to fix coreset")
-        pass
+        strategy = CoreSet(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te)
+        #raise NotImplementedError("Yet to fix coreset")
     elif args.query_mode == 7 :
         albl_list = [EntropySampling(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te),KMeansSampling(X_tr, Y_tr, idxs_lb, net, handler, H_param, X_te, Y_te)]
         strategy = ActiveLearningByLearning(X_tr, Y_tr, idxs_lb, net, handler, H_param, strategy_list = albl_list, X_te = X_te, Y_te = Y_te, delta=0.1)
@@ -168,8 +169,8 @@ def main(args):
 def load_datasets(args):
     
     X_tr, Y_tr, X_eval, Y_eval = get_dataset(args.datasets)
-    #TIN = int(float(X_tr.shape[0])*0.8)
-    TIN = 100
+    TIN = int(float(X_tr.shape[0])*0.8)
+    # TIN = 100
     
     # Testing data split 
     index_te = np.array([np.random.choice(np.where(Y_tr.data.numpy()==i)[0],int(float(len(Y_tr))*0.2*0.1),replace=False) for i in range(10)]).reshape(-1)

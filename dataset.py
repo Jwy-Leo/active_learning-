@@ -18,8 +18,12 @@ def get_MNIST():
     raw_tr = datasets.MNIST('./MNIST', train=True, download=True)
     raw_te = datasets.MNIST('./MNIST', train=False, download=True)
     X_tr = raw_tr.train_data
+    X_tr = X_tr[:,None,...]
+    X_tr = torch.cat([X_tr,X_tr,X_tr],dim=1)
     Y_tr = raw_tr.train_labels
     X_te = raw_te.test_data
+    X_te = X_te[:,None,...]
+    X_te = torch.cat([X_te,X_te,X_te],dim=1)
     Y_te = raw_te.test_labels
     return X_tr, Y_tr, X_te, Y_te
 
@@ -68,9 +72,10 @@ class DataHandler1(Dataset):
 
     def __getitem__(self, index):
         x, y = self.X[index], self.Y[index]
-        if self.transform is not None:
-            x = Image.fromarray(x.numpy(), mode='L')
-            x = self.transform(x)
+        # if self.transform is not None:
+        #     x = Image.fromarray(x.numpy(), mode='L')
+        #     x = self.transform(x)
+        x = x.float().div(255.0)
         return x, y, index
 
     def __len__(self):
